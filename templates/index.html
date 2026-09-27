@@ -1,0 +1,117 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cyber Shield — Advanced</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand"><div class="logo">⬡</div><div><small>CYBER</small><b>SHIELD</b></div></div>
+  <nav>
+    <button class="nav active" data-page="dashboard">⌂ Dashboard</button>
+    <button class="nav" data-page="scanners">⌕ Threat Scanners</button>
+    <button class="nav" data-page="incidents">⚠ Incident Reports</button>
+    <button class="nav" data-page="location">◉ Sender Metadata</button>
+    <button class="nav" data-page="police">⚖ Report to Authorities</button>
+    <button class="nav" data-page="awareness">◈ Awareness Center</button>
+  </nav>
+  <div class="side-status"><i></i> System operational</div>
+</aside>
+
+<main>
+<header>
+  <div><span class="kicker">ADVANCED CYBER SAFETY PLATFORM</span><h1 id="title">Security Dashboard</h1></div>
+  <div><span class="api" id="api">Checking API...</span><button id="theme" class="ghost">◐ Theme</button></div>
+</header>
+
+<section id="dashboard" class="page active">
+  <div class="hero">
+    <div><span class="kicker">CYBER SAFETY SCORE</span><div class="score">82<span>/100</span></div><p>Unified monitoring for suspicious links, messages, email, phone and incidents.</p></div>
+    <div class="ring">82%</div>
+  </div>
+  <div class="stats">
+    <div><small>Total Scans</small><b id="scanCount">0</b><span>This session</span></div>
+    <div><small>Threats Detected</small><b>17</b><span class="danger">5 high risk</span></div>
+    <div><small>Open Incidents</small><b id="incidentCount">0</b><span>Needs review</span></div>
+    <div><small>API Health</small><b class="good">99.9%</b><span>Service online</span></div>
+  </div>
+  <div class="grid">
+    <div class="panel"><div class="panel-head"><h2>Quick Scanner</h2><small>Unified engine</small></div>
+      <div class="quick">
+        <button data-open="message">💬 Message</button><button data-open="url">🌐 URL</button>
+        <button data-open="email">✉ Email</button><button data-open="phone">📱 Phone</button>
+        <button data-open="bank">🏦 Bank Scam</button><button data-open="ip">🌍 IP</button>
+      </div>
+    </div>
+    <div class="panel"><div class="panel-head"><h2>Recent Alerts</h2><small>Live</small></div>
+      <div class="alert"><i class="red"></i><div><b>Suspicious URL detected</b><small>High risk</small></div></div>
+      <div class="alert"><i class="yellow"></i><div><b>Bank-style message</b><small>Medium risk</small></div></div>
+      <div class="alert"><i class="green"></i><div><b>Email scan completed</b><small>Low risk</small></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="scanners" class="page">
+  <div class="tabs">
+    <button class="tab active" data-type="message">Message</button><button class="tab" data-type="url">URL</button>
+    <button class="tab" data-type="email">Email</button><button class="tab" data-type="phone">Mobile</button>
+    <button class="tab" data-type="bank">Bank Scam</button><button class="tab" data-type="ip">IP</button>
+  </div>
+  <div class="panel scanner">
+    <span class="kicker" id="scanKicker">MESSAGE ANALYZER</span>
+    <h2 id="scanTitle">Suspicious Message Checker</h2>
+    <p id="scanHelp">Paste an SMS, email or chat message.</p>
+    <textarea id="scanInput" placeholder="Example: Your account will be blocked. Verify immediately..."></textarea>
+    <div class="actions"><button class="primary" id="scan">Analyze</button><button class="ghost" id="clear">Clear</button></div>
+    <div id="result" class="result hidden"></div>
+  </div>
+</section>
+
+<section id="incidents" class="page">
+  <div class="panel">
+    <div class="panel-head"><h2>Incident Management</h2><button class="primary" id="createIncident">Create Incident</button></div>
+    <div id="incidentList" class="incident-list"><p class="muted">No incidents created in this session.</p></div>
+  </div>
+</section>
+
+<section id="location" class="page">
+  <div class="panel">
+    <span class="kicker">PRIVACY-SAFE INTELLIGENCE</span><h2>Sender Location / Network Metadata</h2>
+    <p class="muted">This is not a covert live-person tracker. In a real deployment, use only lawful, authorized IP/network metadata.</p>
+    <input id="locationInput" placeholder="Authorized sender IP or metadata">
+    <button class="primary" id="locationBtn">Analyze Metadata</button>
+    <div id="locationResult" class="result hidden"></div>
+  </div>
+</section>
+
+<section id="police" class="page">
+  <div class="panel">
+    <span class="kicker">INCIDENT REPORTING</span><h2>Report to Police / Cybercrime Authorities</h2>
+    <p class="muted">Cyber Shield prepares the evidence and report for user review. It does not pretend to file a police complaint automatically.</p>
+    <ol class="steps"><li>Create an incident</li><li>Attach message, URL, phone/email and screenshots</li><li>Generate an incident report</li><li>Review the report</li><li>Submit it through the appropriate official cybercrime/police channel</li></ol>
+    <label class="muted">Evidence / notes</label>
+    <textarea id="reportEvidence" placeholder="Add incident details, transaction reference, suspicious URL, sender information, screenshot notes, etc."></textarea>
+    <div class="actions">
+      <button class="primary" id="reportBtn">Generate Reporting Package</button>
+      <button class="ghost" id="pdfBtn">Download PDF Report</button>
+    </div>
+    <div id="reportResult" class="result hidden"></div>
+  </div>
+</section>
+
+<section id="awareness" class="page">
+  <div class="cards">
+    <article><b>Phishing</b><p>Open important websites yourself instead of following unexpected links.</p></article>
+    <article><b>Bank Safety</b><p>Never share OTP, PIN, CVV or passwords through messages or calls.</p></article>
+    <article><b>UPI Safety</b><p>Verify the recipient and payment request before approving.</p></article>
+    <article><b>Evidence</b><p>Keep original messages, URLs, screenshots and timestamps unchanged.</p></article>
+  </div>
+</section>
+</main></div>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
