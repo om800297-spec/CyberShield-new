@@ -68,3 +68,8 @@ The Sender Metadata module is deliberately **not a covert live-person tracker**.
 ## Police/cybercrime reporting
 
 The project prepares an incident/reporting package for the user. It does not falsely claim that a police complaint was filed. A production version should link the user to the appropriate official government reporting channel and only automate submission if an official API/process explicitly permits it.
+
+## Enhanced Sender Metadata
+The Sender Metadata module now validates a user-entered public IPv4/IPv6 address and queries the server-side `ipwho.is` public IP intelligence endpoint. When available, it displays country, country code, region, city, postal code, timezone, ISP, organization, ASN, domain, and VPN/proxy/Tor indicators. Private/reserved IPs are handled locally. This is approximate IP/network metadata, not precise live-person tracking.
+
+The deployment server needs outbound HTTPS access to the provider. If the provider is unavailable, the UI reports a temporary lookup error rather than inventing metadata.

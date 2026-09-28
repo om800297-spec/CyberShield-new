@@ -42,10 +42,37 @@ async function renderIncidents(){
 }
 $("#createIncident").onclick=()=>createIncident();
 $("#locationBtn").onclick=async()=>{
- const indicator=$("#locationInput").value.trim();if(!indicator){alert("Enter authorized sender metadata.");return}
- const r=await fetch("/api/location-intelligence",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({indicator,source:"user-provided authorized metadata"})});
- const d=await r.json();$("#locationResult").innerHTML=`<b>Metadata-only intelligence</b><p>${d.message}</p><p class="muted">Available production fields: ${d.fields.join(", ")}.</p>`;$("#locationResult").classList.remove("hidden");
+ const indicator=$("#locationInput").value.trim();if(!indicator){alert("Enter a public IPv4 or IPv6 address.");return}
+ $("#locationBtn").disabled=true; $("#locationBtn").textContent="Analyzing...";
+ try{
+  const r=await fetch("/api/location-intelligence",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({indicator,source:"user-provided authorized metadata"})});
+  const d=await r.json();
+  if(!r.ok){$("#locationResult").innerHTML=`<b>Lookup failed</b><p>${d.message||"Unable to analyze this IP."}</p>`;}
+  else {
+   $("#locationResult").innerHTML=`
+    <div class="meta-head"><div><b>IP Metadata Intelligence</b><p class="muted">${d.message||""}</p></div><span class="meta-risk ${String(d.risk||"").toLowerCase()}">${d.risk||"INFO"}</span></div>
+    <div class="meta-grid">
+      <div><small>IP Address</small><b>${d.indicator||"N/A"}</b></div>
+      <div><small>Country</small><b>${d.country||"N/A"} ${d.country_code&&d.country_code!=="N/A"?`(${d.country_code})`:""}</b></div>
+      <div><small>Region</small><b>${d.region||"N/A"}</b></div>
+      <div><small>City</small><b>${d.city||"N/A"}</b></div>
+      <div><small>Postal</small><b>${d.postal||"N/A"}</b></div>
+      <div><small>Timezone</small><b>${d.timezone||"N/A"}</b></div>
+      <div><small>ISP</small><b>${d.isp||"N/A"}</b></div>
+      <div><small>Organization</small><b>${d.organization||"N/A"}</b></div>
+      <div><small>ASN</small><b>${d.asn||"N/A"}</b></div>
+      <div><small>Domain</small><b>${d.domain||"N/A"}</b></div>
+      <div><small>VPN</small><b>${d.vpn||"Unknown"}</b></div>
+      <div><small>Proxy</small><b>${d.proxy||"Unknown"}</b></div>
+      <div><small>Tor</small><b>${d.tor||"Unknown"}</b></div>
+    </div>
+    <p class="meta-note">Source: ${d.source||"public IP intelligence"}. ${d.source_note||""}</p>`;
+  }
+  $("#locationResult").classList.remove("hidden");
+ }catch(e){$("#locationResult").innerHTML="<b>API error.</b><p>Make sure the Flask server and internet connection are available.</p>";$("#locationResult").classList.remove("hidden")}
+ $("#locationBtn").disabled=false; $("#locationBtn").textContent="Analyze Metadata";
 };
+$("#locationClear").onclick=()=>{$("#locationInput").value="";$("#locationResult").classList.add("hidden")};
 let latestReport=null;
 $("#reportBtn").onclick=async()=>{
  const evidence=$("#reportEvidence").value.trim();

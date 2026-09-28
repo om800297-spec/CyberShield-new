@@ -1,7 +1,8 @@
 
 from flask import Flask, render_template, request, jsonify, send_file
 from datetime import datetime
-import io, json, re, os
+import io, json, re, os, ipaddress
+import requests
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -82,16 +83,60 @@ def location_intelligence():
     source = data.get("source", "authorized metadata")
     indicator = str(data.get("indicator", "")).strip()
 
-    # Privacy-safe design: this endpoint does not track a person or reveal precise live location.
-    # In production, connect only to lawful/authorized network metadata services.
-    return jsonify({
-        "status": "metadata-only",
-        "source": source,
-        "indicator": indicator,
-        "message": "No covert or precise live-person tracking is performed.",
-        "fields": ["country", "region", "network", "timezone"],
-        "production_note": "Connect an authorized IP/network intelligence provider server-side."
-    })
+    # Privacy-safe: only analyze an IP explicitly supplied by the user.
+    try:
+        ip = ipaddress.ip_address(indicator)
+    except ValueError:
+        return jsonify({"status": "error", "message": "Enter a valid IPv4 or IPv6 address."}), 400
+
+    if ip.is_private or ip.is_loopback or ip.is_reserved or ip.is_link_local:
+        return jsonify({
+            "status": "private", "ip": indicator,
+            "message": "This is a private/reserved address, so public geographic metadata is not available.",
+            "country": "N/A", "region": "N/A", "city": "N/A", "postal": "N/A",
+            "timezone": "N/A", "isp": "N/A", "organization": "N/A", "asn": "N/A",
+            "vpn": "N/A", "proxy": "N/A", "tor": "N/A", "risk": "N/A"
+        })
+
+    try:
+        r = requests.get(f"https://ipwho.is/{ip}", timeout=6)
+        r.raise_for_status()
+        raw = r.json()
+        if not raw.get("success", True):
+            return jsonify({"status":"error", "message": raw.get("message", "IP intelligence lookup failed.")}), 502
+
+        conn = raw.get("connection") or {}
+        tz = raw.get("timezone") or {}
+        sec = raw.get("security") or {}
+        vpn = bool(sec.get("vpn")) if "vpn" in sec else None
+        proxy = bool(sec.get("proxy")) if "proxy" in sec else None
+        tor = bool(sec.get("tor")) if "tor" in sec else None
+        suspicious = any(v is True for v in (vpn, proxy, tor))
+        risk = "MEDIUM" if suspicious else "LOW"
+
+        return jsonify({
+            "status": "ok", "source": "ipwho.is", "indicator": str(ip),
+            "country": raw.get("country") or "N/A",
+            "country_code": raw.get("country_code") or "N/A",
+            "region": raw.get("region") or "N/A",
+            "city": raw.get("city") or "N/A",
+            "postal": raw.get("postal") or "N/A",
+            "latitude": raw.get("latitude"), "longitude": raw.get("longitude"),
+            "timezone": tz.get("id") or "N/A",
+            "utc_offset": tz.get("utc") or "N/A",
+            "isp": conn.get("isp") or "N/A",
+            "organization": conn.get("org") or "N/A",
+            "asn": conn.get("asn") or "N/A",
+            "domain": conn.get("domain") or "N/A",
+            "vpn": "Detected" if vpn is True else ("Not detected" if vpn is False else "Unknown"),
+            "proxy": "Detected" if proxy is True else ("Not detected" if proxy is False else "Unknown"),
+            "tor": "Detected" if tor is True else ("Not detected" if tor is False else "Unknown"),
+            "risk": risk,
+            "message": "Approximate IP/network metadata returned. This does not identify a person's precise live location.",
+            "source_note": "Public IP intelligence; availability and accuracy depend on the provider."
+        })
+    except requests.RequestException as exc:
+        return jsonify({"status":"error", "message":"IP intelligence service is temporarily unavailable. Try again later."}), 503
 
 
 @app.route("/api/report/pdf", methods=["POST"])
